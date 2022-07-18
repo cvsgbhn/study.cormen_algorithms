@@ -2,15 +2,22 @@ package main
 
 import (
 	"strconv"
+	"sync"
 )
 
 func ExecutePipeline(jobs ...job) {
+	wg := &sync.WaitGroup{}
 	in := make(chan interface{})
 	out := make(chan interface{})
 
 	for i := range jobs {
-		go jobs[i](in, out)
+		wg.Add(1)
+		go func() {
+			jobs[i](in, out)
+			wg.Done()
+		}()
 	}
+	//wg.Wait()
 }
 
 func SingleHash(in, out chan interface{}) {
